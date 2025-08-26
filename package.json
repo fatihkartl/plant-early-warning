@@ -1,0 +1,12 @@
+{
+  "name": "plant-early-warning",
+  "version": "1.0.0",
+  "description": "Plant Early Warning frontend",
+  "main": "src/App.jsx",
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}
