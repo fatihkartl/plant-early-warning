@@ -1,0 +1,26 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: plant-backend
+    env_file:
+      - ./backend/.env   # TR: Atlas URI burada / EN: Atlas URI lives here
+    ports:
+      - "8000:8000"      # host:container
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        # TR: Frontend build sırasında API adresi (tarayıcıdan çağrılacak)
+        # EN: API base for browser-side calls in built app
+        VITE_API_BASE: "http://localhost:8000"
+    container_name: plant-frontend
+    ports:
+      - "5173:80"        # Nginx 80 → host 5173 (CORS whitelist ile uyumlu)
+    depends_on:
+      - backend
+    restart: unless-stopped
