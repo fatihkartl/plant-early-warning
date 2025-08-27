@@ -1,10 +1,10 @@
 /* Tailwind core */
+/* TR: Tailwind direktifleri / EN: Tailwind directives */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Tema arkaplan tonları (light/dark)  */
-/* Theme background tones (light/dark)  */
+/* TR: Tema arkaplan değişkenleri / EN: Theme background variables */
 :root {
   --bg-app: theme(colors.white);
   --bg-page: theme(colors.gray.50);
@@ -12,13 +12,12 @@
 }
 
 .dark {
-  --bg-app: #0f1623;    /* koyu kart */
-  --bg-page: #0b1220;   /* koyu sayfa */
+  --bg-app: #0f1623;
+  --bg-page: #0b1220;
   --text-main: #e6edf5;
 }
 
-/* Global tipografi iyileştirme */
-/* Global typography enhancement */
+/* TR: Global tipografi / EN: Global typography */
 body {
   @apply font-sans text-[15px] antialiased;
   color: var(--text-main);

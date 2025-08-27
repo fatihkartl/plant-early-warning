@@ -1,6 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  darkMode: 'class', // dark mode class tabanlı
+  darkMode: 'class',
   content: [
     "./index.html",
     "./src/**/*.{js,jsx,ts,tsx}",
@@ -8,10 +8,8 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        // Inter font fallback’lı
         sans: ['Inter', 'ui-sans-serif', 'system-ui', 'Arial'],
       },
-      // Hafif pastel ve akıcı bir palet
       colors: {
         brand: {
           50:  "#eefcf7",
@@ -19,7 +17,7 @@ export default {
           200: "#b0efd9",
           300: "#84e6c5",
           400: "#56d8ae",
-          500: "#2ccf9b",  // primary
+          500: "#2ccf9b",
           600: "#1eb384",
           700: "#188d69",
           800: "#136e54",

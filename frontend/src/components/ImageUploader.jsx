@@ -1,32 +1,32 @@
+// src/components/ImageUploader.jsx
 import React, { useState, useRef, useCallback } from "react";
+import { uploadImageForPrediction } from "../lib/api";
+import PredictionCard from "./PredictionCard";
 
-/* Modern drag&drop image uploader
-   - Kart, yumuşak gölge, pastel brand renkleri
-   - Drag over highlight
-   - Clear (Remove) butonu
-*/
+/* Modern drag&drop image uploader + backend integration
+   TR: Yüklenen görseli backend'e gönderir, sonucu kartta gösterir.
+   EN: Sends uploaded image to backend and displays the result in a card. */
 export default function ImageUploader({ onImageSelected }) {
-  const [file, setFile] = useState(null);           // Seçilen dosya / Selected file
-  const [preview, setPreview] = useState(null);     // Önizleme URL / Preview URL
-  const [dragOver, setDragOver] = useState(false);  // Drag highlight state
+  const [file, setFile] = useState(null);
+  const [preview, setPreview] = useState(null);
+  const [dragOver, setDragOver] = useState(false);
+  const [loading, setLoading] = useState(false);        // TR: çağrı durumu / EN: request state
+  const [error, setError] = useState(null);             // TR: hata mesajı / EN: error message
+  const [result, setResult] = useState(null);           // TR: backend sonucu / EN: backend result
   const inputRef = useRef(null);
 
-  // Dosya set et / Set file
   const setFileAndPreview = useCallback((f) => {
     if (!f) return;
     setFile(f);
-    const url = URL.createObjectURL(f);
-    setPreview(url);
-    onImageSelected && onImageSelected(f); // üst bileşene ilet / bubble to parent
+    setPreview(URL.createObjectURL(f));
+    onImageSelected && onImageSelected(f);
   }, [onImageSelected]);
 
-  // Input change
   const handleChange = (e) => {
     const f = e.target.files?.[0];
     if (f) setFileAndPreview(f);
   };
 
-  // Drag events
   const handleDragOver = (e) => { e.preventDefault(); setDragOver(true); };
   const handleDragLeave = () => setDragOver(false);
   const handleDrop = (e) => {
@@ -36,11 +36,27 @@ export default function ImageUploader({ onImageSelected }) {
     if (f && f.type.startsWith("image/")) setFileAndPreview(f);
   };
 
-  // Temizle / Clear
   const handleRemove = () => {
     setFile(null);
     setPreview(null);
+    setResult(null);
+    setError(null);
     if (inputRef.current) inputRef.current.value = "";
+  };
+
+  const handleSend = async () => {
+    if (!file) return;
+    setLoading(true);
+    setError(null);
+    setResult(null);
+    try {
+      const json = await uploadImageForPrediction(file);
+      setResult(json);
+    } catch (err) {
+      setError(err.message || "Unknown error");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -58,12 +74,9 @@ export default function ImageUploader({ onImageSelected }) {
         ].join(" ")}
         aria-label="Upload image"
       >
-        {/* İç alan / inner area */}
         <div className="flex flex-col items-center gap-5">
-          {/* Önizleme yoksa ikon, varsa görsel */}
           {!preview ? (
             <div className="h-24 w-24 rounded-2xl bg-brand-100 flex items-center justify-center">
-              {/* Plus icon */}
               <svg width="40" height="40" viewBox="0 0 24 24" className="text-brand-600" fill="none" stroke="currentColor" strokeWidth="2">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 5v14M5 12h14" />
               </svg>
@@ -76,7 +89,6 @@ export default function ImageUploader({ onImageSelected }) {
             />
           )}
 
-          {/* Başlık & alt metin / title & helper */}
           <div className="text-center">
             <h2 className="text-xl font-semibold">Upload Plant Image</h2>
             <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">
@@ -84,7 +96,6 @@ export default function ImageUploader({ onImageSelected }) {
             </p>
           </div>
 
-          {/* Input hidden */}
           <input
             ref={inputRef}
             type="file"
@@ -93,7 +104,6 @@ export default function ImageUploader({ onImageSelected }) {
             className="hidden"
           />
 
-          {/* Dosya adı + remove */}
           {file && (
             <div className="flex flex-col sm:flex-row items-center gap-3">
               <span className="px-3 py-1 rounded-full bg-gray-100 dark:bg-white/10 text-sm">
@@ -108,13 +118,34 @@ export default function ImageUploader({ onImageSelected }) {
               </button>
             </div>
           )}
+
+          <div className="flex gap-3">
+            <button
+              type="button"
+              onClick={() => inputRef.current?.click()}
+              className="px-4 py-2 rounded-xl border border-gray-200 dark:border-white/10 hover:bg-gray-50 dark:hover:bg-white/5 transition text-sm"
+            >
+              Choose Image
+            </button>
+            <button
+              type="button"
+              disabled={!file || loading}
+              onClick={handleSend}
+              className="px-4 py-2 rounded-xl bg-brand-500 text-white font-medium hover:bg-brand-600 disabled:opacity-50 text-sm"
+            >
+              {loading ? "Predicting..." : "Send to Predict"}
+            </button>
+          </div>
+
+          {error && (
+            <div className="text-sm text-red-600">
+              {error}
+            </div>
+          )}
         </div>
       </div>
 
-      {/* İpucu / small helper */}
-      <p className="text-center text-xs text-gray-400 mt-3">
-        High quality, well-lit leaf close-ups improve detection accuracy.
-      </p>
+      <PredictionCard result={result} />
     </div>
   );
 }
